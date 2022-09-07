@@ -1,6 +1,17 @@
-import 'package:retracer_app/retracer_app.dart' as retracer_app;
+import 'dart:io';
 
-void main(List<String> arguments) {
-  print('Hello world: ${retracer_app.calculate()}!');
-  print('argument: ${retracer_app.parseDumpComment(arguments[0])}');
+import 'package:actions_toolkit_dart/core.dart' as action;
+import 'package:retracer_app/retracer_app.dart';
+
+void main(List<String> arguments) async {
+  final token = action.getInput(name: 'github_token');
+  final content = arguments[0];
+
+  final argument = Arguments(
+    content: content,
+    githubToken: token,
+    repositorySlug: Platform.environment['GITHUB_REPOSITORY']!,
+  );
+
+  await RetracerApp(argument).run();
 }

@@ -3,6 +3,9 @@ name: retracer_app
 on:
   issue_comment:
 
+env:
+  INPUT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   ParseMiniDump:
     runs-on: windows-latest
@@ -18,3 +21,9 @@ jobs:
         run: |
           dart pub get
           dart run retracer_app "${{ github.event.comment.body }}"
+
+  ParseCrashLog:
+    runs-on: ubuntu-latest
+    needs: ParseMiniDump
+    steps:
+      - uses: actions/checkout@v3
