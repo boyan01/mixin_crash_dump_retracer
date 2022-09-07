@@ -17,4 +17,4 @@ jobs:
         working-directory: retracer_app
         run: |
           dart pub get
-          dart run retracer_app ${{ github.event.comment.body }}
+          dart run retracer_app "${{ github.event.comment.body }}"
