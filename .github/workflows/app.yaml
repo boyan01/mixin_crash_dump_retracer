@@ -50,13 +50,13 @@ jobs:
           cat > comment.txt <<EOF
           Crash log dumped:
           
-          mini dump file: `${{ steps.prepare_symbol.outputs.mini_dump_file }}`
+          mini dump file: \`${{ steps.prepare_symbol.outputs.mini_dump_file }}\`
           
           back trace:
           
-          ```
+          \`\`\`
           ${{ steps.dump_crash_log.outputs.crash_log }}
-          ```
+          \`\`\`
           
           EOF
 
