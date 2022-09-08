@@ -1,7 +1,8 @@
 name: retracer_app
 
 on:
-  issue_comment:
+  issues:
+    types: [opened, edited]
 
 env:
   INPUT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -9,8 +10,15 @@ env:
 jobs:
 
   ParseCrashLog:
+    if: github.event.label.name == 'crash'
     runs-on: ubuntu-latest
     steps:
+      - name: Add reaction
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          comment-id: ${{ github.event.issue.id }}
+          reactions: eyes
+
       - uses: actions/checkout@v3
       - uses: dart-lang/setup-dart@v1.3
         with:
@@ -30,4 +38,27 @@ jobs:
           echo "symbol_directory: ${{ steps.prepare_symbol.outputs.symbol_directory }}"
 
       - name: DumpCrashLog
-        run: ./breakpad/linux/x86_64/minidump_stackwalk "${{ steps.prepare_symbol.outputs.mini_dump_file }}" "${{ steps.prepare_symbol.outputs.symbol_directory }}" > crash.log
+        id: dump_crash_log
+        run: |
+          ./breakpad/linux/x86_64/minidump_stackwalk "${{ steps.prepare_symbol.outputs.mini_dump_file }}" "${{ steps.prepare_symbol.outputs.symbol_directory }}" > crash.log
+          crash_log=$(cat crash.log)
+          echo "::set-output name=crash_log::$crash_log"
+
+#      - name: Find Comment
+#        uses: peter-evans/find-comment@v2
+#        id: fc
+#        with:
+#          issue-number: ${{ github.event.pull_request.number }}
+#          comment-author: 'github-actions[bot]'
+#          body-includes: Build output
+
+      - name: PrintCrashLogToComment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            `${{ steps.prepare_symbol.outputs.mini_dump_file }}`
+            
+            ```
+            ${{ steps.dump_crash_log.outputs.crash_log }}
+            ```
