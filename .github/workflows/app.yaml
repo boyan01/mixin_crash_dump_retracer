@@ -59,19 +59,21 @@ jobs:
           comment-author: 'github-actions[bot]'
           body-includes: Crash log dumped
 
-      - name: Create Comment
-        uses: peter-evans/create-or-update-comment@v1
-        if: steps.fc.outputs.comment-id == ''
-        with:
-          issue-number: ${{ github.event.issue.number }}
-          body: ${{ steps.template.outputs.result }}
+#      - name: Create Comment
+#        uses: peter-evans/create-or-update-comment@v1
+#        if: steps.fc.outputs.comment-id == ''
+#        with:
+#          issue-number: ${{ github.event.issue.number }}
+#          body: ${{ steps.template.outputs.result }}
 
-      - name: Update Comment
+      - name: Comment
         uses: peter-evans/create-or-update-comment@v1
-        if: steps.fc.outputs.comment-id != ''
+#        if: steps.fc.outputs.comment-id != ''
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.issue.number }}
           body: ${{ steps.template.outputs.result }}
+          edit-mode: replace
 
       - name: Close Issue
         if: github.event.issue.state == 'open'
