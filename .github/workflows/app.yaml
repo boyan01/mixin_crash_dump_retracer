@@ -37,12 +37,6 @@ jobs:
           crash_log="${crash_log//$'\r'/'%0D'}" 
           echo "::set-output name=crash_log::$crash_log"
 
-      - name: PrintLog
-        run: |
-          cat crash.log
-          echo "------------------------------------"
-          echo "${{ steps.dump_crash_log.outputs.crash_log }}"
-
       - name: Render template
         id: template
         uses: chuhlomin/render-template@v1.4
@@ -51,6 +45,11 @@ jobs:
           vars: |
             dump_file: "${{ steps.prepare_symbol.outputs.mini_dump_file }}"
             backtrace: "${{ steps.dump_crash_log.outputs.crash_log }}"
+
+      - name: PrintLog
+        run: |
+          echo "------------------------------------"
+          echo "${{ steps.template.outputs.result }}"
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
