@@ -27,11 +27,6 @@ jobs:
           dart pub get
           dart run retracer_app "${{ github.event.issue.body }}"
 
-      - name: PrintInfo
-        run: |
-          echo "mini_dump_file: ${{ steps.prepare_symbol.outputs.mini_dump_file }}"
-          echo "symbol_directory: ${{ steps.prepare_symbol.outputs.symbol_directory }}"
-
       - name: DumpCrashLog
         id: dump_crash_log
         run: |
@@ -41,6 +36,12 @@ jobs:
           crash_log="${crash_log//$'\n'/'%0A'}"
           crash_log="${crash_log//$'\r'/'%0D'}" 
           echo "::set-output name=crash_log::$crash_log"
+
+      - name: PrintLog
+        run: |
+          cat crash.log
+          echo "------------------------------------"
+          echo "${{ steps.dump_crash_log.outputs.crash_log }}"
 
       - name: Render template
         id: template
