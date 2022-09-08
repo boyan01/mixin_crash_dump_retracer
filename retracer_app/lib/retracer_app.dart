@@ -30,15 +30,40 @@ class RetracerApp {
 
   Future<void> run() async {
     // find version matched pdb files.
-    final pdbFiles = await _downloadDebugInfoFiles();
-    if (pdbFiles == null || pdbFiles.isEmpty) {
-      action.error(message: 'No pdb files found');
+    final symbolDirectory = await _downloadDebugInfoFiles();
+    if (symbolDirectory == null || symbolDirectory.isEmpty) {
+      action.error(message: 'No symbol files found');
       exit(-1);
     }
-    action.info(message: 'pdb files: $pdbFiles');
+    action.info(message: 'symbols: $symbolDirectory');
+    final miniDumpFile = await _downloadCrashMiniDump();
+    if (miniDumpFile == null || miniDumpFile.isEmpty) {
+      action.error(message: 'No mini dump file found');
+      exit(-1);
+    }
+    action.setOutput(name: 'symbol_directory', value: symbolDirectory);
+    action.setOutput(name: 'mini_dump_file', value: miniDumpFile);
   }
 
-  Future<List<String>?> _downloadDebugInfoFiles() async {
+  Future<String?> _downloadCrashMiniDump() async {
+    action.startGroup(name: 'download mini dump');
+    final miniDumpZip = await downloadFile(parsed.miniDumpUrl);
+    final directory = await unzipFile(miniDumpZip);
+    final dir = Directory(directory);
+    final files = dir.listSync();
+    if (files.isEmpty) {
+      action.error(message: 'No files found in $directory');
+      return null;
+    }
+    final miniDumpFile = files.firstWhere((element) {
+      return element is File && element.path.endsWith('.dmp');
+    });
+    action.endGroup();
+    return miniDumpFile.path;
+  }
+
+  // return the symbol directory
+  Future<String?> _downloadDebugInfoFiles() async {
     action.startGroup(name: 'Find PDB files');
     final slug = RepositorySlug.full(arguments.repositorySlug);
     final issues = await githubClient.issues.listByRepo(
@@ -69,9 +94,9 @@ class RetracerApp {
     }
     action.debug(message: 'Found debug info file: $fileUrl');
     final downloadedFile = await downloadFile(fileUrl);
-    final pdbFiles = await unzipFile(downloadedFile);
+    final symbolDirectory = await unzipFile(downloadedFile);
     action.endGroup();
-    return pdbFiles;
+    return symbolDirectory;
   }
 }
 
@@ -89,7 +114,7 @@ Future<String> downloadFile(String url) async {
 }
 
 // unzip file to local temp directory. return the directory path.
-Future<List<String>> unzipFile(String filePath) async {
+Future<String> unzipFile(String filePath) async {
   final tempDir = await Directory.systemTemp.createTemp();
   final unzipDir = Directory('${tempDir.path}/unzip');
   await unzipDir.create();
@@ -105,5 +130,5 @@ Future<List<String>> unzipFile(String filePath) async {
       Directory('${unzipDir.path}/$filename').createSync(recursive: true);
     }
   }
-  return unzipDir.listSync().map((e) => e.path).toList();
+  return unzipDir.path;
 }
