@@ -67,5 +67,3 @@ jobs:
         uses: peter-evans/close-issue@v1
         with:
           issue-number: ${{ github.event.issue.number }}
-          comment: |
-            Crash log has been dumped to comment, issue closed.
