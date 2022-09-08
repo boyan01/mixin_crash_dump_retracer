@@ -62,3 +62,9 @@ jobs:
             ```
             ${{ steps.dump_crash_log.outputs.crash_log }}
             ```
+      - name: Close Issue
+        uses: peter-evans/close-issue@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          comment: |
+            Crash log has been dumped to comment, issue closed.
