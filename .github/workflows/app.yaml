@@ -45,22 +45,22 @@ jobs:
           comment-author: 'github-actions[bot]'
           body-includes: Crash log dumped
 
+      - name: Echo Comment to File
+        run: |
+          echo "Crash log dumped:\n" > comment.txt
+          echo "mini dump file: `${{ steps.prepare_symbol.outputs.mini_dump_file }}`\n" > comment.txt
+          echo "back trace:\n" > comment.txt
+          echo "```\n${{ steps.dump_crash_log.outputs.crash_log }}\n```" > comment.txt
+
+      - run: cat comment.txt
+
       - name: Comment
-        uses: peter-evans/create-or-update-comment@v1
+        uses: umanghome/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.issue.number }}
           edit-mode: replace
-          body: |
-            Crash log dumped:
-
-            mini dump file: `${{ steps.prepare_symbol.outputs.mini_dump_file }}`
-            
-            back trace:
-              
-            ```
-            ${{ steps.dump_crash_log.outputs.crash_log }}
-            ```
+          file: comment.txt
 
       - name: Close Issue
         if: github.event.issue.state == 'open'
