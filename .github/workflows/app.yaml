@@ -7,23 +7,18 @@ env:
   INPUT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  ParseMiniDump:
-    runs-on: windows-latest
+
+  ParseCrashLog:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: dart-lang/setup-dart@v1.3
         with:
           sdk: "stable"
 
-      # parse comment and get the dump file
+      # prepare debug symbols and crash mini dump
       - name: Parse Comment Content
         working-directory: retracer_app
         run: |
           dart pub get
           dart run retracer_app "${{ github.event.comment.body }}"
-
-  ParseCrashLog:
-    runs-on: ubuntu-latest
-    needs: ParseMiniDump
-    steps:
-      - uses: actions/checkout@v3

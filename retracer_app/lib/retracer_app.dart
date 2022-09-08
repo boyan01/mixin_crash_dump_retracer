@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:actions_toolkit_dart/core.dart' as action;
+import 'package:archive/archive.dart';
 import 'package:github/github.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
-import 'package:archive/archive.dart';
 
 import 'src/arguments.dart';
 import 'src/dump_comment_parser.dart';
@@ -30,7 +30,7 @@ class RetracerApp {
 
   Future<void> run() async {
     // find version matched pdb files.
-    final pdbFiles = await _downloadPdbFiles();
+    final pdbFiles = await _downloadDebugInfoFiles();
     if (pdbFiles == null || pdbFiles.isEmpty) {
       action.error(message: 'No pdb files found');
       exit(-1);
@@ -38,33 +38,37 @@ class RetracerApp {
     action.info(message: 'pdb files: $pdbFiles');
   }
 
-  Future<List<String>?> _downloadPdbFiles() async {
+  Future<List<String>?> _downloadDebugInfoFiles() async {
     action.startGroup(name: 'Find PDB files');
     final slug = RepositorySlug.full(arguments.repositorySlug);
     final issues = await githubClient.issues.listByRepo(
       slug,
-      labels: ['pdb', parsed.version],
+      labels: ['debug_info', 'v:${parsed.version}'],
     ).toList();
     if (issues.isEmpty) {
-      action.info(message: 'No PDB files found for version ${parsed.version}');
+      action.info(
+          message: 'No debug info files found for version ${parsed.version}');
       return null;
     }
 
     if (issues.length > 1) {
       action.warning(
-        message: 'Found multiple PDB files for version ${parsed.version}',
+        message:
+            'Found multiple debug info files for version ${parsed.version}',
       );
     }
     final issue = issues.first;
-    final pdbUrl = RegExp(r'(?<=\().+?(?=\))').firstMatch(issue.body)?.group(0);
-    if (pdbUrl == null) {
+    final fileUrl =
+        RegExp(r'(?<=\().+?(?=\))').firstMatch(issue.body)?.group(0);
+    if (fileUrl == null) {
       action.warning(
-        message: 'No PDB url found in issue ${issue.htmlUrl}: ${issue.body}',
+        message:
+            'No debug info url found in issue ${issue.htmlUrl}: ${issue.body}',
       );
       return null;
     }
-    action.debug(message: 'Found PDB file: $pdbUrl');
-    final downloadedFile = await downloadFile(pdbUrl);
+    action.debug(message: 'Found debug info file: $fileUrl');
+    final downloadedFile = await downloadFile(fileUrl);
     final pdbFiles = await unzipFile(downloadedFile);
     action.endGroup();
     return pdbFiles;
