@@ -74,6 +74,7 @@ class RetracerApp {
     final slug = RepositorySlug.full(arguments.repositorySlug);
     final issues = await githubClient.issues.listByRepo(
       slug,
+      state: 'all',
       labels: ['debug_info', 'v:${parsed.version}'],
     ).toList();
     if (issues.isEmpty) {
