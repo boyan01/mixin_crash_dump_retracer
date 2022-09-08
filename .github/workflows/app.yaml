@@ -37,27 +37,44 @@ jobs:
         run: |
           ./breakpad/linux/x86_64/minidump_stackwalk "${{ steps.prepare_symbol.outputs.mini_dump_file }}" "${{ steps.prepare_symbol.outputs.symbol_directory }}" > crash.log
           crash_log=$(cat crash.log)
+          crash_log="${crash_log//'%'/'%25'}"
+          crash_log="${crash_log//$'\n'/'%0A'}"
+          crash_log="${crash_log//$'\r'/'%0D'}" 
           echo "::set-output name=crash_log::$crash_log"
 
-#      - name: Find Comment
-#        uses: peter-evans/find-comment@v2
-#        id: fc
-#        with:
-#          issue-number: ${{ github.event.pull_request.number }}
-#          comment-author: 'github-actions[bot]'
-#          body-includes: Build output
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.4
+        with:
+          template: .github/comment-template.md
+          vars: |
+            dump_file: ${{ steps.prepare_symbol.outputs.mini_dump_file }}
+            backtrace: ${{ steps.dump_crash_log.outputs.crash_log }}
 
-      - name: PrintCrashLogToComment
-        uses: peter-evans/create-or-update-comment@v1
+      - name: Find Comment
+        uses: peter-evans/find-comment@v2
+        id: fc
         with:
           issue-number: ${{ github.event.issue.number }}
-          body: |
-            `${{ steps.prepare_symbol.outputs.mini_dump_file }}`
-            
-            ```
-            ${{ steps.dump_crash_log.outputs.crash_log }}
-            ```
+          comment-author: 'github-actions[bot]'
+          body-includes: Crash log dumped
+
+      - name: Create Comment
+        uses: peter-evans/create-or-update-comment@v1
+        if: steps.fc.outputs.comment-id == ''
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: ${{ steps.template.outputs.result }}
+
+      - name: Update Comment
+        uses: peter-evans/create-or-update-comment@v1
+        if: steps.fc.outputs.comment-id != ''
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          body: ${{ steps.template.outputs.result }}
+
       - name: Close Issue
+        if: github.event.issue.state == 'open'
         uses: peter-evans/close-issue@v1
         with:
           issue-number: ${{ github.event.issue.number }}
