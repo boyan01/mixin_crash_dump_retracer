@@ -30,12 +30,15 @@ class RetracerApp {
 
   Future<void> run() async {
     // find version matched pdb files.
-    final symbolDirectory = await _downloadDebugInfoFiles();
-    if (symbolDirectory == null || symbolDirectory.isEmpty) {
+    final downloadedSymbolDir = await _downloadDebugInfoFiles();
+    if (downloadedSymbolDir == null || downloadedSymbolDir.isEmpty) {
       action.error(message: 'No symbol files found');
       exit(-1);
     }
-    action.info(message: 'symbol_directory: $symbolDirectory');
+    action.info(message: 'download_symbol_directory: $downloadedSymbolDir');
+
+    final symbolDirectory = await prepareSymbolFiles(downloadedSymbolDir);
+    action.info(message: 'symbol_directory: $downloadedSymbolDir');
 
     final miniDumpFile = await _downloadCrashMiniDump();
     if (miniDumpFile == null || miniDumpFile.isEmpty) {
@@ -134,4 +137,26 @@ Future<String> unzipFile(String filePath) async {
     }
   }
   return unzipDir.path;
+}
+
+/// move symbol file in [dirPath] to separated xxx.pdb/uuid/xxx.sym
+Future<String> prepareSymbolFiles(String dirPath) async {
+  final symbolsDir = await Directory.systemTemp.createTemp('symbols');
+  final files = Directory(dirPath).listSync();
+  for (final file in files) {
+    if (file is File && file.path.endsWith('.sym')) {
+      final content = file.readAsLinesSync();
+      if (content.isEmpty) {
+        continue;
+      }
+      final infos = content.first.split(' ');
+      final uuid = infos[3];
+      final pdbFileName = infos[4];
+
+      final targetDir = Directory(p.join(symbolsDir.path, pdbFileName, uuid));
+      await targetDir.create(recursive: true);
+      await file.copy(p.join(targetDir.path, p.basename(file.path)));
+    }
+  }
+  return symbolsDir.path;
 }

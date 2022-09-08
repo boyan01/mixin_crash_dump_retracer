@@ -13,4 +13,11 @@ void main() {
     final files = await unzipFile(path);
     expect(files, isNotEmpty);
   });
+
+  test('prepare symbol files', () async {
+    final dir = await prepareSymbolFiles(
+        '/home/boyan/workspace/mixin_crash_dump_retracer/tmp/windows_debug_info');
+    expect(dir, isNotEmpty);
+    print(dir);
+  });
 }

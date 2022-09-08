@@ -28,3 +28,6 @@ jobs:
         run: |
           echo "mini_dump_file: ${{ steps.prepare_symbol.outputs.mini_dump_file }}"
           echo "symbol_directory: ${{ steps.prepare_symbol.outputs.symbol_directory }}"
+
+      - name: DumpCrashLog
+        run: ./breakpad/linux/x86_64/minidump_stackwalk "${{ steps.prepare_symbol.outputs.mini_dump_file }}" "${{ steps.prepare_symbol.outputs.symbol_directory }}" > crash.log
