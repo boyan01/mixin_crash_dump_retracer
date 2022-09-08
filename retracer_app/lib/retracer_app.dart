@@ -35,12 +35,15 @@ class RetracerApp {
       action.error(message: 'No symbol files found');
       exit(-1);
     }
-    action.info(message: 'symbols: $symbolDirectory');
+    action.info(message: 'symbol_directory: $symbolDirectory');
+
     final miniDumpFile = await _downloadCrashMiniDump();
     if (miniDumpFile == null || miniDumpFile.isEmpty) {
       action.error(message: 'No mini dump file found');
       exit(-1);
     }
+    action.info(message: 'mini_dump_file: $miniDumpFile');
+
     action.setOutput(name: 'symbol_directory', value: symbolDirectory);
     action.setOutput(name: 'mini_dump_file', value: miniDumpFile);
   }

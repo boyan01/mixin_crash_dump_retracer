@@ -18,6 +18,7 @@ jobs:
 
       # prepare debug symbols and crash mini dump
       - name: PrepareSymbol
+        id: prepare_symbol
         working-directory: retracer_app
         run: |
           dart pub get
@@ -25,5 +26,5 @@ jobs:
 
       - name: PrintInfo
         run: |
-          echo "mini_dump_file: ${{ steps.PrepareSymbol.outputs.mini_dump_file }}"
-          echo "symbol_directory: ${{ steps.PrepareSymbol.outputs.symbol_directory }}"
+          echo "mini_dump_file: ${{ steps.prepare_symbol.outputs.mini_dump_file }}"
+          echo "symbol_directory: ${{ steps.prepare_symbol.outputs.symbol_directory }}"
