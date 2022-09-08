@@ -16,7 +16,7 @@ jobs:
       - name: Add reaction
         uses: peter-evans/create-or-update-comment@v2
         with:
-          comment-id: ${{ github.event.issue.id }}
+          issue-number: ${{ github.event.issue.number }}
           reactions: eyes
 
       - uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
         working-directory: retracer_app
         run: |
           dart pub get
-          dart run retracer_app "${{ github.event.comment.body }}"
+          dart run retracer_app "${{ github.event.issue.body }}"
 
       - name: PrintInfo
         run: |
