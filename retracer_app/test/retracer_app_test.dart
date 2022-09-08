@@ -12,7 +12,5 @@ void main() {
     expect(file.existsSync(), isTrue);
     final files = await unzipFile(path);
     expect(files, isNotEmpty);
-    expect(files.length, 1);
-    expect(files.first, endsWith('8e63e760-5067-4dd5-b1ca-55579e8f9977.dmp'));
   });
 }
