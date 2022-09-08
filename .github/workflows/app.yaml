@@ -55,7 +55,7 @@ jobs:
       - run: cat comment.txt
 
       - name: Comment
-        uses: umanghome/create-or-update-comment@v1
+        uses: umanghome/create-or-update-comment@main
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.issue.number }}
