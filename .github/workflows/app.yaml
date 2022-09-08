@@ -13,11 +13,6 @@ jobs:
     if: contains(github.event.issue.labels.*.name, 'crash')
     runs-on: ubuntu-latest
     steps:
-      - name: Add reaction
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          issue-number: ${{ github.event.issue.number }}
-          reactions: eyes
 
       - uses: actions/checkout@v3
       - uses: dart-lang/setup-dart@v1.3
