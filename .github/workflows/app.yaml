@@ -2,7 +2,7 @@ name: retracer_app
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened, edited, labeled]
 
 env:
   INPUT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -37,20 +37,6 @@ jobs:
           crash_log="${crash_log//$'\r'/'%0D'}" 
           echo "::set-output name=crash_log::$crash_log"
 
-      - name: Render template
-        id: template
-        uses: chuhlomin/render-template@v1.4
-        with:
-          template: .github/comment-template.md
-          vars: |
-            dump_file: "${{ steps.prepare_symbol.outputs.mini_dump_file }}"
-            backtrace: "${{ steps.dump_crash_log.outputs.crash_log }}"
-
-      - name: PrintLog
-        run: |
-          echo "------------------------------------"
-          echo "${{ steps.template.outputs.result }}"
-
       - name: Find Comment
         uses: peter-evans/find-comment@v2
         id: fc
@@ -59,21 +45,22 @@ jobs:
           comment-author: 'github-actions[bot]'
           body-includes: Crash log dumped
 
-#      - name: Create Comment
-#        uses: peter-evans/create-or-update-comment@v1
-#        if: steps.fc.outputs.comment-id == ''
-#        with:
-#          issue-number: ${{ github.event.issue.number }}
-#          body: ${{ steps.template.outputs.result }}
-
       - name: Comment
         uses: peter-evans/create-or-update-comment@v1
-#        if: steps.fc.outputs.comment-id != ''
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.issue.number }}
-          body: ${{ steps.template.outputs.result }}
           edit-mode: replace
+          body: |
+            Crash log dumped:
+
+            mini dump file: `${{ steps.prepare_symbol.outputs.mini_dump_file }}`
+            
+            back trace:
+              
+            ```
+            ${{ steps.dump_crash_log.outputs.crash_log }}
+            ```
 
       - name: Close Issue
         if: github.event.issue.state == 'open'
