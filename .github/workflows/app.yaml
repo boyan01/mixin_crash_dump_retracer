@@ -47,10 +47,18 @@ jobs:
 
       - name: Echo Comment to File
         run: |
-          echo "Crash log dumped:\n" > comment.txt
-          echo "mini dump file: `${{ steps.prepare_symbol.outputs.mini_dump_file }}`\n" > comment.txt
-          echo "back trace:\n" > comment.txt
-          echo "```\n${{ steps.dump_crash_log.outputs.crash_log }}\n```" > comment.txt
+          cat > comment.txt <<EOF
+          Crash log dumped:
+          
+          mini dump file: `${{ steps.prepare_symbol.outputs.mini_dump_file }}`
+          
+          back trace:
+          
+          ```
+          ${{ steps.dump_crash_log.outputs.crash_log }}
+          ```
+          
+          EOF
 
       - run: cat comment.txt
 
