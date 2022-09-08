@@ -2,7 +2,7 @@ name: retracer_app
 
 on:
   issues:
-    types: [opened, edited, labeled]
+    types: [edited, labeled]
 
 env:
   INPUT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
