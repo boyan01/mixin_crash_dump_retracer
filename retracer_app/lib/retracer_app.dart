@@ -109,6 +109,7 @@ class RetracerApp {
 
 // download file to local temp directory. return the file path.
 Future<String> downloadFile(String url) async {
+  action.info(message: 'Downloading $url');
   final response = await http.get(Uri.parse(url));
 
   if (response.statusCode != 200) {
