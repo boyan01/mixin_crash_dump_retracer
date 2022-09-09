@@ -1,3 +1,5 @@
+import 'package:retracer_app/src/utils.dart';
+
 class DumpCommentParseResult {
   DumpCommentParseResult({
     required this.version,
@@ -22,12 +24,10 @@ DumpCommentParseResult? parseDumpComment(String comment) {
   }
   final version = match.group(0)!.trim();
 
-  final miniDumpUrlMatch = RegExp(r'(?<=\().+?(?=\))').firstMatch(comment);
-  if (miniDumpUrlMatch == null) {
+  final miniDumpUrl = extractUrlFromComment(comment);
+  if (miniDumpUrl == null) {
     return null;
   }
-  final miniDumpUrl = miniDumpUrlMatch.group(0)!;
-
   return DumpCommentParseResult(
     version: version,
     miniDumpUrl: miniDumpUrl,

@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:github/github.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
+import 'package:retracer_app/src/utils.dart';
 
 import 'src/arguments.dart';
 import 'src/dump_comment_parser.dart';
@@ -90,8 +91,7 @@ class RetracerApp {
       );
     }
     final issue = issues.first;
-    final fileUrl =
-        RegExp(r'(?<=\().+?(?=\))').firstMatch(issue.body)?.group(0);
+    final fileUrl = extractUrlFromComment(issue.body);
     if (fileUrl == null) {
       action.warning(
         message:
@@ -109,7 +109,6 @@ class RetracerApp {
 
 // download file to local temp directory. return the file path.
 Future<String> downloadFile(String url) async {
-  action.info(message: 'Downloading $url');
   final response = await http.get(Uri.parse(url));
 
   if (response.statusCode != 200) {
