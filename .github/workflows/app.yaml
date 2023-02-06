@@ -51,7 +51,7 @@ jobs:
           script: |
             const fs = require('fs');
             const comment_body = "crash log dumped:\n\nmini dump file: `${{ steps.prepare_symbol.outputs.mini_dump_file }}`\n\nback trace:\n\n```\n${{ steps.dump_crash_log.outputs.crash_log }}\n```\n\n"
-            fs.writeFileSync('comment.txt', comment.data.body);
+            fs.writeFileSync('comment.txt', comment_body);
 
       - run: cat comment.txt
 
