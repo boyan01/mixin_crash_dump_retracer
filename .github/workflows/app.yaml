@@ -31,11 +31,6 @@ jobs:
         id: dump_crash_log
         run: |
           ./breakpad/linux/x86_64/minidump_stackwalk "${{ steps.prepare_symbol.outputs.mini_dump_file }}" "${{ steps.prepare_symbol.outputs.symbol_directory }}" > crash.log
-          crash_log=$(cat crash.log)
-          crash_log="${crash_log//'%'/'%25'}"
-          crash_log="${crash_log//$'\n'/'%0A'}"
-          crash_log="${crash_log//$'\r'/'%0D'}" 
-          echo "::set-output name=crash_log::$crash_log"
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
@@ -45,15 +40,7 @@ jobs:
           comment-author: 'github-actions[bot]'
           body-includes: Crash log dumped
 
-      - name: save comment to file
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const comment_body = "crash log dumped:\n\nmini dump file: `${{ steps.prepare_symbol.outputs.mini_dump_file }}`\n\nback trace:\n\n```\n${{ steps.dump_crash_log.outputs.crash_log }}\n```\n\n"
-            fs.writeFileSync('comment.txt', comment_body);
-
-      - run: cat comment.txt
+      - run: cat crash.log
 
       - name: Comment
         uses: umanghome/create-or-update-comment@main
@@ -61,7 +48,7 @@ jobs:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.issue.number }}
           edit-mode: replace
-          file: comment.txt
+          file: crash.log
 
       - name: Close Issue
         if: github.event.issue.state == 'open'
