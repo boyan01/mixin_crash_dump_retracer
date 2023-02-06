@@ -30,7 +30,10 @@ jobs:
       - name: DumpCrashLog
         id: dump_crash_log
         run: |
-          ./breakpad/linux/x86_64/minidump_stackwalk "${{ steps.prepare_symbol.outputs.mini_dump_file }}" "${{ steps.prepare_symbol.outputs.symbol_directory }}" > crash.log
+          echo "mini dump file: ${{ steps.prepare_symbol.outputs.mini_dump_file }}" >> crash.log
+          echo "\`\`\`" >> crash.log
+          ./breakpad/linux/x86_64/minidump_stackwalk "${{ steps.prepare_symbol.outputs.mini_dump_file }}" "${{ steps.prepare_symbol.outputs.symbol_directory }}" >> crash.log
+          echo "\`\`\`" >> crash.log
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
