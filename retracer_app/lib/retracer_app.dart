@@ -54,8 +54,11 @@ class RetracerApp {
 
   Future<String?> _downloadCrashMiniDump() async {
     action.startGroup(name: 'download mini dump');
-    final miniDumpZip = await downloadFile(parsed.miniDumpUrl);
-    final directory = await unzipFile(miniDumpZip);
+    final file = await downloadFile(parsed.miniDumpUrl);
+    if (file.endsWith('.dmp')) {
+      return file;
+    }
+    final directory = await unzipFile(file);
     final dir = Directory(directory);
     final files = dir.listSync();
     if (files.isEmpty) {
