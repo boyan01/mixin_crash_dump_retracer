@@ -116,7 +116,7 @@ Future<String> downloadFile(String url) async {
   }
   final tempDir = await Directory.systemTemp.createTemp();
   final downloadedFile = File('${tempDir.path}/${p.basename(url)}');
-  await downloadedFile.writeAsBytes(response.bodyBytes);
+  await downloadedFile.writeAsBytes(response.bodyBytes, flush: true);
   return downloadedFile.path;
 }
 
